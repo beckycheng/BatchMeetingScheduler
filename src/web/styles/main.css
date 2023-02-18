@@ -1,0 +1,48 @@
+html{
+    min-height: 100vh;
+}
+
+body{
+    font-family: 'Chiron Sans HK WS', sans-serif;
+    min-height: 100vh;
+
+}
+#main{
+    max-width: 800px
+}
+
+.card{
+    border: 1px solid white;
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+}
+
+.btn-lg{
+    padding: 2rem;
+    font-size: 3rem;
+    border-radius: 0.3rem;
+}
+
+.bg-poly{
+    background-color: #B85661;
+}
+
+.bg-light{
+    background-color: #f8f9fa;
+    border-color:#f8f9fa ;
+    box-shadow:none;
+}
+
+.text-poly{
+    color: #B85661;
+}
+
+.btn-poly{
+    background-color: #B85661;
+    border-color: #B85661;
+
+}
+
+.btn-poly:hover {
+    background-color: #9a414b;
+    border-color: #9a414b;
+}

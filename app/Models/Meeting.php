@@ -38,4 +38,9 @@ class Meeting extends Model
     {
         return $this->belongsTo('App\Models\User', 'moderator', 'id');
     }
+
+    public function participants()
+    {
+        return $this->hasMany('App\Models\Participant');
+    }
 }

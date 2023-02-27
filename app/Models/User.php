@@ -47,4 +47,9 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->belongsTo('App\Models\Role');
     }
+
+    public function meetings()
+    {
+        return $this->hasMany('App\Models\Meeting', 'moderator');
+    }
 }

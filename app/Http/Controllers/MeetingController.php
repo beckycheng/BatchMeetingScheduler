@@ -56,7 +56,10 @@ class MeetingController extends Controller
      */
     public function show(Meeting $meeting)
     {
-        //
+        $user = auth()->user();
+        $meeting_role = $meeting->moderator === $user->id ? 'moderator' :
+            ($meeting->participants->contains('username', $user->name) ? 'participant' : null);
+        return view('meeting.show', compact('meeting', 'meeting_role'));
     }
 
     /**

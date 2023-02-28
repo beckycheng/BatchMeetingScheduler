@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Meeting;
+use App\Models\Participant;
 use Illuminate\Http\Request;
 
 class MeetingController extends Controller
@@ -45,7 +46,17 @@ class MeetingController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $timeslots = collect($this->getTimeslots($request))
+            ->map(fn($intervals) => $this->mergeIntervals($intervals))
+            ->map(fn($intervals) => $this->splitIntervals($intervals, $request->duration))
+            ->toArray();
+
+        $meetingData = $this->validatedData($request, $timeslots);
+        $meeting = auth()->user()->meetings()->create($meetingData);
+        collect(explode(',', $request->participants))
+            ->map(fn($participant) => $this->createParticipant($meeting, $participant));
+        return redirect()->route('meeting.show', $meeting)
+            ->with('success', 'The meeting has been created successfully.');
     }
 
     /**
@@ -94,5 +105,87 @@ class MeetingController extends Controller
     public function destroy(Meeting $meeting)
     {
         //
+    }
+
+    private function validatedData(Request $request, $timeslots): array
+    {
+        return $request->validate([
+            'title' => 'required|max:100',
+            'subject' => 'nullable',
+            'deadline' => 'required|date',
+            'duration' => 'required|max:65535',
+            'participants' => 'required',
+        ]) + [
+            'timeslots' => $timeslots,
+            'moderator' => auth()->id(),
+        ];
+    }
+
+    private function createParticipant(Meeting $meeting, string $username)
+    {
+        return Participant::create([
+            'meeting_id' => $meeting->id,
+            'username' => trim($username),
+        ]);
+    }
+
+    private function getTimeslots(Request $request): array
+    {
+        $timeslots = [];
+        $dayCount = $request->input('daycount');
+        for ($i = 1; $i <= $dayCount; $i++) {
+            $date = $request->input("day{$i}date");
+            $startTimes = $request->input("day{$i}starttime");
+            $endTimes = $request->input("day{$i}endtime");
+            foreach ($startTimes as $index => $start) {
+                $end = $endTimes[$index];
+                $timeslots[$date][] = [
+                    'start' => strtotime($start),
+                    'end' => strtotime($end),
+                ];
+            }
+        }
+        ksort($timeslots);
+        return $timeslots;
+    }
+
+    private function mergeIntervals(array $intervals): array
+    {
+        if (count($intervals) <= 1) {
+            return $intervals;
+        }
+        usort($intervals, fn($a, $b) => $a['start'] <=> $b['start']);
+
+        $merged = [];
+        $lastMerged = $intervals[0];
+        foreach ($intervals as $interval) {
+            if ($interval['start'] <= $lastMerged['end']) {
+                $lastMerged['end'] = max($lastMerged['end'], $interval['end']);
+            } else {
+                $merged[] = $lastMerged;
+                $lastMerged = $interval;
+            }
+        }
+        $merged[] = $lastMerged;
+        return $merged;
+    }
+
+    private function splitIntervals(array $intervals, int $duration): array
+    {
+        if (empty($intervals) || $duration <= 0) {
+            return [];
+        }
+        $subIntervals = [];
+        foreach ($intervals as $interval) {
+            $start = $interval['start'];
+            $end = $interval['end'];
+            while ($start + 60 * $duration <= $end) {
+                $startTime = date('H:i', $start);
+                $endTime = date('H:i', $start + 60 * $duration);
+                $subIntervals[] = "${startTime}-${endTime}";
+                $start += 60 * $duration;
+            }
+        }
+        return $subIntervals;
     }
 }

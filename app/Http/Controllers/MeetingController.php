@@ -104,7 +104,9 @@ class MeetingController extends Controller
      */
     public function destroy(Meeting $meeting)
     {
-        //
+        $meeting->delete();
+        return redirect()->route('meeting.index')
+            ->with('success', 'Meeting deleted successfully.');
     }
 
     private function validatedData(Request $request, $timeslots): array

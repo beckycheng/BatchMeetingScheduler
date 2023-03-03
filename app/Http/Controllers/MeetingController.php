@@ -35,6 +35,7 @@ class MeetingController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', Meeting::class);
         return view('meeting.create');
     }
 
@@ -46,6 +47,8 @@ class MeetingController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', Meeting::class);
+
         $timeslots = collect($this->getTimeslots($request))
             ->map(fn($intervals) => $this->mergeIntervals($intervals))
             ->map(fn($intervals) => $this->splitIntervals($intervals, $request->duration))
@@ -67,6 +70,7 @@ class MeetingController extends Controller
      */
     public function show(Meeting $meeting)
     {
+        $this->authorize('view', $meeting);
         $user = auth()->user();
         $meeting_role = $meeting->moderator === $user->id ? 'moderator' :
             ($meeting->participants->contains('username', $user->name) ? 'participant' : null);
@@ -104,6 +108,7 @@ class MeetingController extends Controller
      */
     public function destroy(Meeting $meeting)
     {
+        $this->authorize('delete', $meeting);
         $meeting->delete();
         return redirect()->route('meeting.index')
             ->with('success', 'Meeting deleted successfully.');

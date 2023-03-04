@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\CreateMeetingMail;
 use App\Models\Meeting;
 use App\Models\Participant;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class MeetingController extends Controller
 {
@@ -57,7 +59,14 @@ class MeetingController extends Controller
         $meetingData = $this->validatedData($request, $timeslots);
         $meeting = auth()->user()->meetings()->create($meetingData);
         collect(explode(',', $request->participants))
-            ->map(fn($participant) => $this->createParticipant($meeting, $participant));
+            ->map(fn($participant) => $this->createParticipant($meeting, $participant))
+            ->each(function ($participant) use ($meeting) {
+                $email = "{$participant->username}@connect.polyu.hk";
+                Mail::to($email)->later(now()->addSeconds(5), new CreateMeetingMail([
+                    'meeting' => $meeting,
+                    'student_id' => $participant->username,
+                ]));
+            });
         return redirect()->route('meeting.show', $meeting)
             ->with('success', 'The meeting has been created successfully.');
     }

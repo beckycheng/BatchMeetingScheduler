@@ -19,6 +19,7 @@ Route::get('/', function () {
 })->middleware('guest');
 
 Route::resource('meeting', MeetingController::class);
+Route::get('meeting/{meeting}/choose', [MeetingController::class, 'choose'])->name('meeting.choose');
 
 Auth::routes(['verify' => true]);
 

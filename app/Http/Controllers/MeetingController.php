@@ -30,6 +30,12 @@ class MeetingController extends Controller
         return view('meeting.index', compact('meetings'));
     }
 
+    public function choose(Meeting $meeting)
+    {
+        $this->authorize('choose', $meeting);
+        return view('meeting.choose', compact('meeting'));
+    }
+
     /**
      * Show the form for creating a new resource.
      *

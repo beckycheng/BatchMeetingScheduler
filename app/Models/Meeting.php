@@ -19,6 +19,8 @@ class Meeting extends Model
         'duration',
         'deadline',
         'timeslots',
+        'num_available_days',
+        'num_slots_per_day',
     ];
 
     public $incrementing = false;

@@ -88,6 +88,17 @@
                       </div>
                     </div>
 
+                    <div class="row">
+                      <div class="col-md-6 mb-3">
+                        <label for="days">Number of available days for selection in time slots:</label>
+                        <input type="number" name="num_available_days" class="form-control" min="1" required />
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <label for="times">Number of time slots that should be selected per day:</label>
+                        <input type="number" name="num_slots_per_day" class="form-control" min="1" required />
+                      </div>
+                    </div>
+
                     <div class="mb-3">
                       <label for="studentid" class="form-label">{{ __('Student ID') }}</label>
                       <br>

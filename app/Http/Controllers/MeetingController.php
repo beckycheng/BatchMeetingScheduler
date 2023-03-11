@@ -137,6 +137,8 @@ class MeetingController extends Controller
             'deadline' => 'required|date',
             'duration' => 'required|max:65535',
             'participants' => 'required',
+            'num_available_days' => 'required|min:1',
+            'num_slots_per_day' => 'required|min:1',
         ]) + [
             'timeslots' => $timeslots,
             'moderator' => auth()->id(),

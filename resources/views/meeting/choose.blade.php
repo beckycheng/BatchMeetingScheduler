@@ -37,6 +37,17 @@
                         </div>
                     </div>
 
+                    <div class="row my-3">
+                        <div class="col-md-6 mb-3">
+                            <label for="days">Number of available days for selection in time slots:</label>
+                            <input type="number" name="num_available_days" class="form-control" value="{{$meeting->num_available_days}}" disabled readonly />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="times">Number of time slots that can be selected per day:</label>
+                            <input type="number" name="num_available_days" class="form-control" value="{{$meeting->num_slots_per_day}}" disabled readonly />
+                        </div>
+                    </div>
+
                     <form id="meeting-time-slots" action="">
                         @csrf
                         @foreach ($meeting->timeslots as $date => $times)

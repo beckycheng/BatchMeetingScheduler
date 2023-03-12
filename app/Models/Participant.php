@@ -14,10 +14,11 @@ class Participant extends Model
         'username',
         'preferred_time',
         'scheduled_time',
+        'preferred_time_updated_at',
     ];
 
     protected $casts = [
-        'preferred_times' => 'array',
+        'preferred_time' => 'array',
     ];
 
     public function meeting()

@@ -77,6 +77,21 @@ class MeetingController extends Controller
             ->with('success', 'The meeting has been created successfully.');
     }
 
+    public function storeChoose(Request $request, Meeting $meeting)
+    {
+        $this->authorize('choose', $meeting);
+        $participant = $meeting->participants->where('username', auth()->user()->name)->firstOrFail();
+        $timeslots = $meeting->flattenTimeslots();
+        $preferredTimeSlots = collect($request->input('preferred_time'));
+        if (!$preferredTimeSlots->every(fn($time) => $timeslots->contains($time)))
+        {
+            abort(400, 'Invalid preferred times.');
+        }
+        $participant->update(['preferred_time' => $preferredTimeSlots->toJson()]);
+        return redirect()->route('meeting.show', $meeting)
+            ->with('success', 'Your preferred times have been saved.');
+    }
+
     /**
      * Display the specified resource.
      *

@@ -45,4 +45,12 @@ class Meeting extends Model
     {
         return $this->hasMany('App\Models\Participant');
     }
+
+    public function flattenTimeslots()
+    {
+        return collect($this->timeslots)
+            ->flatMap(function ($slots, $date) {
+                return collect($slots)->map(fn($slot) => "$date $slot");
+            });
+    }
 }

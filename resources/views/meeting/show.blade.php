@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@php
+$participant = $meeting->participants->where('username', auth()->user()->name)->first();
+@endphp
+
 @section('content')
 <div class="container">
     <div class="row justify-content-center">
@@ -67,6 +71,15 @@
                             </div>
                         @endforeach
                     </div>
+                    @if ($participant && $preferredTimes = $participant->preferred_time ?? '')
+                        <h5>Your Preferred Times:</h5>
+                        <ul class="list-group">
+                            @foreach ($preferredTimes as $time)
+                                <li class="list-group-item">{{ $time }}</li>
+                            @endforeach
+                        </ul>
+                    @endif
+
                 </div>
             </div>
         </div>

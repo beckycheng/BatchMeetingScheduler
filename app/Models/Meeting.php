@@ -21,6 +21,7 @@ class Meeting extends Model
         'timeslots',
         'num_available_days',
         'num_slots_per_day',
+        'status',
     ];
 
     public $incrementing = false;

@@ -31,7 +31,7 @@
                             <h5>Title: <span class="text-muted">{{ __($meeting->title) }}</span></h5>
                             <h5>Subject: <span class="text-muted">{{ $meeting->subject ?: __('(empty)') }}</span></h5>
                             <h5>Teacher: <span class="text-muted">{{ __($meeting->moderatorUser->name) }}</span></h5>
-                            <h5>Duration: <span class="text-muted">{{ __($meeting->duration) }}</span></h5>
+                            <h5>Duration: <span class="text-muted">{{ __($meeting->duration . ' minutes') }}</span></h5>
                             <h5>Deadline: <span class="text-muted">{{ __($meeting->deadline) }}</span></h5>
                             <h5>Students: <span class="text-muted">{{ __(join(', ', array_column($meeting->participants->toArray(), 'username'))) }}</span></h5>
                         </div>
@@ -40,11 +40,11 @@
                     <div class="row my-3">
                         <div class="col-md-6 mb-3">
                             <label for="days">Number of available days for selection in time slots:</label>
-                            <input type="number" name="num_available_days" class="form-control" value="{{$meeting->num_available_days}}" disabled readonly />
+                            <input type="number" name="num_available_days" class="form-control" value="{{ $meeting->num_available_days }}" disabled readonly />
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="times">Number of time slots that can be selected per day:</label>
-                            <input type="number" name="num_available_days" class="form-control" value="{{$meeting->num_slots_per_day}}" disabled readonly />
+                            <input type="number" name="num_slots_per_day" class="form-control" value="{{ $meeting->num_slots_per_day }}" disabled readonly />
                         </div>
                     </div>
 
@@ -85,35 +85,51 @@
     </div>
 </div>
 <script>
+    function isTimeSelectionValid(selectedTimeSlots, numSelectedDays, numSelectedSlotsPerDay) {
+        const timeSlotsPerDay = selectedTimeSlots.reduce(function(acc, [date, timeSlot]) {
+            acc[date] = acc[date] || [];
+            acc[date].push(timeSlot);
+            return acc;
+        }, {});
+
+        const selectedDaysCount = Object.keys(timeSlotsPerDay).length;
+        if (selectedDaysCount !== numSelectedDays) {
+            return false;
+        }
+
+        const slotsAreValid = Object.values(timeSlotsPerDay).every(function(slots) {
+            return slots.length === numSelectedSlotsPerDay;
+        });
+        return slotsAreValid;
+    }
+
     $(document).ready(() => {
+        const numAvailableDays = {{ $meeting->num_available_days }};
+        const numSlotsPerDay = {{ $meeting->num_slots_per_day }};
+
         $('#meeting-time-slots').submit((e) => {
             const selectedTime = $('#meeting-time-slots').serializeArray()
                 .filter(v => !isNaN(Date.parse(v.name)))
                 .map(v => [v.name, v.value]);
 
-            if ($("input[type='checkbox']:checked").length > 0) {
+            if (isTimeSelectionValid(selectedTime, numAvailableDays, numSlotsPerDay)) {
                 $('#meeting-time-slots').hide();
                 selectedTime.forEach((timeSlot) => {
-                    const val = timeSlot[0] + ' ' + timeSlot[1];
-                    const newTimeSlot = $('<li>').addClass('list-group-item').text(val);
-                    const i = $('<input>').attr({
-                        type: 'hidden',
-                        name: 'time-slot',
-                        value: val
-                    });
-                    newTimeSlot.append(
-                        $('<input>').attr({
-                            type: 'hidden',
-                            name: 'preferred_time[]',
-                            value: val,
-                        })
-                    );
+                    const newTimeSlot = $('<li>').addClass('list-group-item')
+                        .text(timeSlot[0] + ' ' + timeSlot[1])
+                        .append(
+                            $('<input>').attr({
+                                type: 'hidden',
+                                name: 'preferred_time[]',
+                                value: timeSlot[0] + ' ' + timeSlot[1],
+                            })
+                        );
                     $('#sortable-timeslots').append(newTimeSlot);
                 });
                 jQuery('#sortable-timeslots').sortable();
                 $('#meeting-time-order').show();
             } else {
-                // ...
+                alert(`Number of available days for selection in time slots: ${numAvailableDays}\nNumber of time slots that can be selected per day: ${numSlotsPerDay}`);
             }
             e.preventDefault();
         });

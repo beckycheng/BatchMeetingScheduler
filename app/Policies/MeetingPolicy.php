@@ -35,7 +35,8 @@ class MeetingPolicy
 
     public function choose(User $user, Meeting $meeting)
     {
-        return $meeting->participants->contains('username', $user->name);
+        $participant = $meeting->participants->where('username', '=', $user->name)->first();
+        return $meeting->status == 'Pending' && $participant && $participant->scheduled_time === null;
     }
 
     /**

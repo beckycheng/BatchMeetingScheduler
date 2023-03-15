@@ -87,7 +87,10 @@ class MeetingController extends Controller
         {
             abort(400, 'Invalid preferred times.');
         }
-        $participant->update(['preferred_time' => $preferredTimeSlots->toJson()]);
+        $participant->update([
+            'preferred_time' => $preferredTimeSlots->toArray(),
+            'preferred_time_updated_at' => Carbon::now(),
+        ]);
         return redirect()->route('meeting.show', $meeting)
             ->with('success', 'Your preferred times have been saved.');
     }

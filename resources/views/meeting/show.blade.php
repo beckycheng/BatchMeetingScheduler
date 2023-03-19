@@ -2,6 +2,10 @@
 
 @php
 $participant = $meeting->participants->where('username', auth()->user()->name)->first();
+$scheduledTimes = $meeting->participants
+    ->whereNotNull('scheduled_time')
+    ->pluck('scheduled_time', 'username')
+    ->all();
 @endphp
 
 @section('content')
@@ -22,17 +26,19 @@ $participant = $meeting->participants->where('username', auth()->user()->name)->
                 <div class="card-header d-flex">
                     <div class="my-auto">{{ __('Meeting') }} ({{ __($meeting->id)}})</div>
                     <div class="ms-auto">
-                        @if ($meeting_role == 'moderator')
-                            <form action="{{ route('meeting.destroy', $meeting) }}" method="post">
-                                @csrf
-                                @method('delete')
-                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you certain that you want to delete this meeting?')">{{ __('Delete') }}</button>
-                            </form>
-                        @elseif ($meeting_role == 'participant')
-                            <a class="btn btn-primary btn-sm" href="{{ route('meeting.choose', $meeting) }}">{{ __('Choose Time') }}</a>
-                        @else
-                            <button class="btn btn-danger btn-sm invisible">{{ __('Button') }}</button>
-                        @endif
+                        <div class="d-flex flex-row">
+                            @if ($meeting_role == 'moderator')
+                                <form action="{{ route('meeting.destroy', $meeting) }}" method="post">
+                                    @csrf
+                                    @method('delete')
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you certain that you want to delete this meeting?')">{{ __('Delete') }}</button>
+                                </form>
+                            @elseif ($meeting->status == 'Pending' && $participant && $participant->scheduled_time === null)
+                                <a class="btn btn-primary btn-sm" href="{{ route('meeting.choose', $meeting) }}">{{ __('Choose Time') }}</a>
+                            @else
+                                <button class="btn btn-danger btn-sm invisible">{{ __('Button') }}</button>
+                            @endif
+                        </div>
                     </div>
                 </div>
 
@@ -44,11 +50,11 @@ $participant = $meeting->participants->where('username', auth()->user()->name)->
                     <h5>Deadline: <span class="text-muted">{{ __($meeting->deadline) }}</span></h5>
                     <h5>Students:</h5>
                     <div class="row mb-2">
-                        @foreach ($meeting->participants as $participant)
+                        @foreach ($meeting->participants as $p)
                             <div class="col-md-4 mb-2">
-                                <div class="card">
+                                    <div class="card{{ $p->scheduled_time ? ' text-bg-success' : ( $p->preferred_time ? ' text-bg-primary' : '') }}">
                                     <div class="card-body">
-                                        <span class="card-text">{{ $participant->username }}</span>
+                                        <span class="card-text">{{ $p->username }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -63,7 +69,11 @@ $participant = $meeting->participants->where('username', auth()->user()->name)->
                                         <h5 class="card-title">{{ $date }}</h5>
                                         <ul class="list-unstyled">
                                             @foreach ($times as $time)
-                                                <li>{{ $time }}</li>
+                                                @if ($meeting_role == 'moderator' && $username = array_search($date . ' ' . $time, $scheduledTimes))
+                                                    <li>{{ $time }} ({{ __($username) }})</li>
+                                                @else
+                                                    <li>{{ $time }}</li>
+                                                @endif
                                             @endforeach
                                         </ul>
                                     </div>
@@ -71,7 +81,13 @@ $participant = $meeting->participants->where('username', auth()->user()->name)->
                             </div>
                         @endforeach
                     </div>
-                    @if ($participant && $preferredTimes = $participant->preferred_time ?? '')
+
+                    @if ($participant && $scheduledTime = $participant->scheduled_time)
+                        <h5>Scheduled Time:</h5>
+                        <ul class="list-group">
+                            <li class="list-group-item bg-green list-group-item-success">{{ $scheduledTime }}</li>
+                        </ul>
+                    @elseif ($participant && $preferredTimes = $participant->preferred_time ?? '')
                         <h5>Your Preferred Times:</h5>
                         <ul class="list-group">
                             @foreach ($preferredTimes as $time)

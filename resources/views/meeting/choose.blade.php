@@ -33,7 +33,6 @@
                             <h5>Teacher: <span class="text-muted">{{ __($meeting->moderatorUser->name) }}</span></h5>
                             <h5>Duration: <span class="text-muted">{{ __($meeting->duration . ' minutes') }}</span></h5>
                             <h5>Deadline: <span class="text-muted">{{ __($meeting->deadline) }}</span></h5>
-                            <h5>Students: <span class="text-muted">{{ __(join(', ', array_column($meeting->participants->toArray(), 'username'))) }}</span></h5>
                         </div>
                     </div>
 

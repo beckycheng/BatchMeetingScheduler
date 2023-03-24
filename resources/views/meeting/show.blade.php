@@ -48,18 +48,20 @@ $scheduledTimes = $meeting->participants
                     <h5>Teacher: <span class="text-muted">{{ __($meeting->moderatorUser->name) }}</span></h5>
                     <h5>Duration: <span class="text-muted">{{ __($meeting->duration . ' minutes') }}</span></h5>
                     <h5>Deadline: <span class="text-muted">{{ __($meeting->deadline) }}</span></h5>
-                    <h5>Students:</h5>
-                    <div class="row mb-2">
-                        @foreach ($meeting->participants as $p)
-                            <div class="col-md-4 mb-2">
+                    @if ($meeting_role == 'moderator')
+                        <h5>Students:</h5>
+                        <div class="row mb-2">
+                            @foreach ($meeting->participants as $p)
+                                <div class="col-md-4 mb-2">
                                     <div class="card{{ $p->scheduled_time ? ' text-bg-success' : ( $p->preferred_time ? ' text-bg-primary' : '') }}">
-                                    <div class="card-body">
-                                        <span class="card-text">{{ $p->username }}</span>
+                                        <div class="card-body">
+                                            <span class="card-text">{{ $p->username }}</span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        @endforeach
-                    </div>
+                            @endforeach
+                        </div>
+                    @endif
                     <h5>Time Slots:</h5>
                     <div class="row">
                         @foreach ($meeting->timeslots as $date => $times)

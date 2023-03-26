@@ -118,7 +118,8 @@ class MeetingController extends Controller
      */
     public function edit(Meeting $meeting)
     {
-        //
+        $this->authorize('edit', $meeting);
+        return view('meeting.edit', compact('meeting'));
     }
 
     /**

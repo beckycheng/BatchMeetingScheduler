@@ -51,6 +51,18 @@ class MeetingPolicy
     }
 
     /**
+     * Determine whether the user can edit models.
+     *
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Meeting  $meeting
+     * @return \Illuminate\Auth\Access\Response|bool
+     */
+    public function edit(User $user, Meeting $meeting)
+    {
+        return $user->id === $meeting->moderator;
+    }
+
+    /**
      * Determine whether the user can delete the model.
      *
      * @param  \App\Models\User  $user

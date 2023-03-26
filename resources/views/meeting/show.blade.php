@@ -28,6 +28,7 @@ $scheduledTimes = $meeting->participants
                     <div class="ms-auto">
                         <div class="d-flex flex-row">
                             @if ($meeting_role == 'moderator')
+                                <a href="{{ route('meeting.edit', $meeting) }}" class="btn btn-primary btn-sm mx-1">{{ __('Edit') }}</a>
                                 <form action="{{ route('meeting.destroy', $meeting) }}" method="post">
                                     @csrf
                                     @method('delete')

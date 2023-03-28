@@ -131,7 +131,39 @@ class MeetingController extends Controller
      */
     public function update(Request $request, Meeting $meeting)
     {
-        //
+        $this->authorize('edit', $meeting);
+
+        $timeSlots = collect($request->input('timeslots'));
+        $newSlots = collect($this->subtractTimes(
+            collect($this->getTimeslots($request))
+                ->map(fn($intervals) => $this->mergeIntervals($intervals)),
+            $timeSlots->map(fn($times, $date) => $this->transformTimeSlots($times))
+        ))->map(fn($intervals) => $this->splitIntervals($intervals, 20));
+
+        $mergedTimeSlots = $this->mergeTimeSlots(
+            $timeSlots->toArray(),
+            $newSlots->toArray()
+        );
+
+        $meetingData = $this->validatedData($request, $mergedTimeSlots);
+        $meetingData['status'] = 'Pending';
+        $meeting->update($meetingData);
+
+        $meeting->participants
+            ->whereNull('scheduled_time')
+            ->pluck('username')
+            ->each(function ($username) use ($meeting) {
+                if (in_array($username, [])) {
+                    $email = "{$username}@connect.polyu.hk";
+                    Mail::to($email)->later(now()->addSeconds(5), new CreateMeetingMail([
+                        'meeting' => $meeting,
+                        'student_id' => $username,
+                    ]));
+                }
+            });
+
+        return redirect()->route('meeting.show', $meeting)
+            ->with('success', 'The meeting has been updated successfully.');
     }
 
     /**
@@ -230,5 +262,65 @@ class MeetingController extends Controller
             }
         }
         return $subIntervals;
+    }
+
+    private function subtractTimes($freeTimes, $busyTimes)
+    {
+        $result = [];
+        foreach ($freeTimes as $date => $freeSlots) {
+            if (!isset($busyTimes[$date])) {
+                $result[$date] = $freeSlots;
+                continue;
+            }
+            $busySlots = $busyTimes[$date];
+            $slotsAfterSubtraction = [];
+            foreach ($freeSlots as $freeSlot) {
+                $freeStart = $freeSlot['start'];
+                $freeEnd = $freeSlot['end'];
+                $subtract = false;
+                foreach ($busySlots as $busySlot) {
+                    $busyStart = $busySlot['start'];
+                    $busyEnd = $busySlot['end'];
+                    if ($freeStart < $busyEnd && $freeEnd > $busyStart) {
+                        $subtract = true;
+                        if ($freeStart < $busyStart) {
+                            $slotsAfterSubtraction[] = [
+                                'start' => $freeStart,
+                                'end' => $busyStart,
+                            ];
+                        }
+                        $freeStart = $busyEnd;
+                    }
+                }
+                if (!$subtract || $freeStart < $freeEnd) {
+                    $slotsAfterSubtraction[] = [
+                        'start' => $freeStart,
+                        'end' => $freeEnd,
+                    ];
+                }
+            }
+            $result[$date] = $slotsAfterSubtraction;
+        }
+        return $result;
+    }
+
+    private function transformTimeSlots($times)
+    {
+        $res = [];
+        foreach ($times as $time) {
+            [$start, $end] = explode('-', $time);
+            $res[] = ['start' => strtotime($start), 'end' => strtotime($end)];
+        }
+        return $res;
+    }
+
+    private function mergeTimeSlots(array $existing, array $new): array
+    {
+        $merged = array_merge_recursive($existing, $new);
+        foreach ($merged as $date => $slots) {
+            sort($slots);
+            $merged[$date] = $slots;
+        }
+        return $merged;
     }
 }

@@ -28,6 +28,12 @@ $scheduledTimes = $meeting->participants
                     <div class="ms-auto">
                         <div class="d-flex flex-row">
                             @if ($meeting_role == 'moderator')
+                                @if ($meeting->status != 'Completed')
+                                    <form action="{{ route('meeting.random', $meeting) }}" method="post">
+                                        @csrf
+                                        <button type="submit" class="btn btn-outline-primary btn-sm" onclick="return confirm('Do you really want to randomly schedule the meeting time for all participants?')">{{ __('Random') }}</button>
+                                    </form>
+                                @endif
                                 <a href="{{ route('meeting.edit', $meeting) }}" class="btn btn-primary btn-sm mx-1">{{ __('Edit') }}</a>
                                 <form action="{{ route('meeting.destroy', $meeting) }}" method="post">
                                     @csrf

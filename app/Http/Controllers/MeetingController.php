@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Mail\CreateMeetingMail;
 use App\Models\Meeting;
 use App\Models\Participant;
+use App\Services\MeetingService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
 
 class MeetingController extends Controller
@@ -93,6 +95,12 @@ class MeetingController extends Controller
         ]);
         return redirect()->route('meeting.show', $meeting)
             ->with('success', 'Your preferred times have been saved.');
+    }
+
+    public function random(Request $request, Meeting $meeting) {
+        $this->authorize('edit', $meeting);
+        MeetingService::randomSchedule($meeting);
+        return redirect()->route('meeting.show', $meeting);
     }
 
     /**

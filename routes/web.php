@@ -21,6 +21,7 @@ Route::get('/', function () {
 Route::resource('meeting', MeetingController::class);
 Route::get('meeting/{meeting}/choose', [MeetingController::class, 'choose'])->name('meeting.choose');
 Route::post('meeting/{meeting}/choose', [MeetingController::class, 'storeChoose'])->name('meeting.store-choose');
+Route::post('meeting/{meeting}/random', [MeetingController::class, 'random'])->name('meeting.random');
 
 Auth::routes(['verify' => true]);
 

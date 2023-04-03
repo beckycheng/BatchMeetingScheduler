@@ -66,4 +66,42 @@ class MeetingService
             $meeting->save();
         });
     }
+
+    public static function randomSchedule(Meeting $meeting)
+    {
+        MeetingService::schedule($meeting);
+        if ($meeting->status == 'Completed') {
+            return;
+        }
+
+        DB::transaction(function () use ($meeting) {
+            $participants = $meeting->participants
+                ->whereNull('scheduled_time')
+                ->shuffle();
+
+            $scheduledSlots = $meeting->participants
+                ->pluck('scheduled_time')
+                ->filter();
+
+            $availableTimeSlots = $meeting->flattenTimeslots()
+                ->filter(fn($time, $idx) => !$scheduledSlots->contains($time))
+                ->shuffle();
+
+            foreach ($participants as $participant) {
+                $scheduledTime = $availableTimeSlots->pop();
+                if ($scheduledTime !== null) {
+                    $scheduledSlots[] = $scheduledTime;
+                    $participant->scheduled_time = $scheduledTime;
+                    $participant->save();
+                }
+            }
+
+            if ($meeting->participants->whereNull('scheduled_time')->count() === 0) {
+                $meeting->status = 'Completed';
+            } else {
+                $meeting->status = 'Confirmed';
+            }
+            $meeting->save();
+        });
+    }
 }

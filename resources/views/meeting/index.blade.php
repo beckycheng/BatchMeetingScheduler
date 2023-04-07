@@ -26,6 +26,9 @@
 
                 <div class="card-body">
                     @forelse ($meetings as $meeting)
+                        @php
+                            $participant = $meeting->participants->where('username', auth()->user()->name)->first();
+                        @endphp
                         <div class="card mb-2">
                             <div class="card-header d-flex">
                                 <a class="my-auto" href="{{ route('meeting.show', $meeting->id) }}">{{ __('Meeting') }} ({{ __($meeting->id)}})</a>
@@ -36,6 +39,9 @@
                                 <h5>Teacher: <span class="text-muted">{{ __($meeting->moderatorUser->name) }}</span></h5>
                                 <h5>Duration: <span class="text-muted">{{ __($meeting->duration . ' minutes') }}</span></h5>
                                 <h5>Deadline: <span class="text-muted">{{ __($meeting->deadline) }}</span></h5>
+                                @if ($participant && $scheduledTime = $participant->scheduled_time)
+                                    <h5>Scheduled Time: <span class="text-danger">{{ __($scheduledTime) }}</span></h5>
+                                @endif
                             </div>
                         </div>
                     @empty

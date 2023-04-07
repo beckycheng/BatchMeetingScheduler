@@ -25,9 +25,8 @@ class MeetingController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $meetings = Meeting::with('participants')
-            ->whereHas('participants', fn($query) => $query->where('username', $user->name))
-            ->orWhere('moderator', $user->id)
+        $meetings = Meeting::where('moderator', $user->id)
+            ->orWhereHas('participants', fn($query) => $query->where('username', $user->name))
             ->get();
         return view('meeting.index', compact('meetings'));
     }

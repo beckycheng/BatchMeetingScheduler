@@ -32,9 +32,15 @@ class MeetingScheduleCommand extends Command
     public function handle()
     {
         $now = Carbon::now()->tz('Asia/Hong_Kong');
+        $date = Carbon::parse($now)->toDateString();
+        $time = Carbon::parse($now)->toTimeString();
         Meeting::where('status', '=', 'Pending')
-            ->whereDate('deadline', '<=', $now)
-            ->whereTime('deadline', '<=', $now)
+            ->whereDate('deadline', '<', $date)
+            ->orWhere(function ($query) use ($date, $time) {
+                $query->where('status', '=', 'Pending')
+                    ->whereDate('deadline', '=', $date)
+                    ->whereTime('deadline', '<=', $time);
+            })
             ->each(fn($meeting) => MeetingService::schedule($meeting));
         return Command::SUCCESS;
     }

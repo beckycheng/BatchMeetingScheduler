@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use App\Mail\ScheduledMeetingMail;
 use App\Models\Meeting;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class MeetingService
 {
@@ -51,6 +53,12 @@ class MeetingService
                 } else {
                     // Otherwise, set the participant's scheduled time.
                     $participant->scheduled_time = $scheduledTime;
+                    $email = "{$participant->username}@connect.polyu.hk";
+                    Mail::to($email)->later(now()->addSeconds(5), new ScheduledMeetingMail([
+                        'meeting' => $meeting,
+                        'student_id' => $participant->username,
+                        'scheduled_time' => $scheduledTime,
+                    ]));
                 }
             
                 $participant->save();
@@ -93,6 +101,12 @@ class MeetingService
                     $scheduledSlots[] = $scheduledTime;
                     $participant->scheduled_time = $scheduledTime;
                     $participant->save();
+                    $email = "{$participant->username}@connect.polyu.hk";
+                    Mail::to($email)->later(now()->addSeconds(5), new ScheduledMeetingMail([
+                        'meeting' => $meeting,
+                        'student_id' => $participant->username,
+                        'scheduled_time' => $scheduledTime,
+                    ]));
                 }
             }
 

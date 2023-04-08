@@ -140,6 +140,7 @@ class MeetingController extends Controller
     {
         $this->authorize('edit', $meeting);
 
+
         $timeSlots = collect($request->input('timeslots'));
         $newSlots = collect($this->subtractTimes(
             collect($this->getTimeslots($request))
@@ -152,6 +153,7 @@ class MeetingController extends Controller
             $newSlots->toArray()
         );
 
+        $sendEmails = $request->has('send_emails');
         $meetingData = $this->validatedData($request, $mergedTimeSlots);
         $meetingData['status'] = 'Pending';
         $meeting->update($meetingData);
@@ -159,8 +161,8 @@ class MeetingController extends Controller
         $meeting->participants
             ->whereNull('scheduled_time')
             ->pluck('username')
-            ->each(function ($username) use ($meeting) {
-                if (in_array($username, [])) {
+            ->each(function ($username) use ($meeting, $sendEmails) {
+                if ($sendEmails) {
                     $email = "{$username}@connect.polyu.hk";
                     Mail::to($email)->later(now()->addSeconds(5), new CreateMeetingMail([
                         'meeting' => $meeting,

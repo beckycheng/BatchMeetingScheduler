@@ -82,7 +82,7 @@ $scheduledTimes = $meeting->participants
                             </div>
                         </div>
 
-                        <div class="row">
+                        <div class="form-group mb-3 row">
                             <div class="col-md-6 mb-3">
                                 <label for="days">Number of available days for selection in time slots:</label>
                                 <input type="number" name="num_available_days" class="form-control" min="1" value="{{ $meeting->num_available_days }}" required />
@@ -91,6 +91,11 @@ $scheduledTimes = $meeting->participants
                                 <label for="times">Number of time slots that should be selected per day:</label>
                                 <input type="number" name="num_slots_per_day" class="form-control" min="1" value="{{ $meeting->num_slots_per_day }}" required />
                             </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <input type="checkbox" name="send_emails" />
+                            <label for="send_emails">Send notification emails</label>
                         </div>
 
                         <input type="hidden" name="participants" value="{{ $participants }}">

@@ -171,7 +171,7 @@
                   <tr  >
                     <td class="center-text"  align="center" style="font-family:'Roboto Slab',Arial,Helvetica,sans-serif;font-size:26px;line-height:36px;font-weight:400;font-style:normal;color:#d7e057;text-decoration:none;letter-spacing:0px;">
                       <div  >
-                        {{ __('It is based on first come first served bias.') }}
+                        {{ __('It is based on first-come first-served basis.') }}
                       </div>
                     </td>
                   </tr>

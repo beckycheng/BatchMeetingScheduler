@@ -48,6 +48,40 @@ php artisan serve
 You can access the website at http://localhost:8000
 
 
+## Laravel Task Scheduling without Cron Jobs
+
+Laravel provides a powerful task scheduling system that allows you to schedule tasks to run at specific intervals. However, for local development, setting up cron jobs can be cumbersome. Fortunately, there's an alternative solution using `node-schedule`.
+
+1. Installing `node-schedule`
+```
+npm install node-schedule --save-dev
+```
+
+2.  In the Laravel project's root directory, create a file called `dev-scheduler.js`. Paste the following code into the file:
+```js
+const schedule = require('node-schedule')
+const { exec } = require('child_process')
+
+new schedule.scheduleJob('* * * * *', function() {
+    exec('php artisan schedule:run', function(error, stdout, stderr) {
+        if (error) console.log(error)
+        if (stderr) console.log(stderr)
+        console.log(stdout)
+    })
+})
+```
+
+3. Running the scheduler
+To run the scheduler, execute the following command in your Laravel project's root directory:
+```bash
+node dev-scheduler.js
+```
+
+This will start the node-schedule and run the Laravel scheduler at the intervals specified in your code.
+
+Note that this solution is not meant for production. For production environments, it's recommended to use cron jobs instead.
+
+
 ## Configuration
 
 The `.env` file contains various settings required for the Laravel project. Here are some of the most common settings that need to be configured:

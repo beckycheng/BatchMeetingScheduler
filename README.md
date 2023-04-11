@@ -36,12 +36,17 @@ php artisan key:generate
 php artisan migrate
 ```
 
-8. Compile the frontend assets:
+8. Seed the database with records
+```bash
+php artisan db:seed
+```
+
+9. Compile the frontend assets:
 ```bash
 npm run build
 ```
 
-9. Start the development server:
+10. Start the development server:
 ```bash
 php artisan serve
 ```
@@ -53,7 +58,7 @@ You can access the website at http://localhost:8000
 Laravel provides a powerful task scheduling system that allows you to schedule tasks to run at specific intervals. However, for local development, setting up cron jobs can be cumbersome. Fortunately, there's an alternative solution using `node-schedule`.
 
 1. Installing `node-schedule`
-```
+```bash
 npm install node-schedule --save-dev
 ```
 

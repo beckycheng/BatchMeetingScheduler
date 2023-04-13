@@ -144,7 +144,7 @@ $(document).ready(function() {
         $('#day'+(daycount-2)+'delete').removeClass("disabled");
         $('#daycount').val(daycount-2);
         daycount--;
-        $(this).parent('div').parent('div').parent('div').remove();
+        $(this).parent('div').parent('div').parent('div').parent('div').remove();
     }else{
         $(this).parent('div').parent('div').remove();
     }

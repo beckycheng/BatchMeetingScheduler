@@ -146,7 +146,7 @@ class MeetingController extends Controller
             collect($this->getTimeslots($request))
                 ->map(fn($intervals) => $this->mergeIntervals($intervals)),
             $timeSlots->map(fn($times, $date) => $this->transformTimeSlots($times))
-        ))->map(fn($intervals) => $this->splitIntervals($intervals, 20));
+        ))->map(fn($intervals) => $this->splitIntervals($intervals, $meeting->duration));
 
         $mergedTimeSlots = $this->mergeTimeSlots(
             $timeSlots->toArray(),

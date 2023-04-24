@@ -6,7 +6,7 @@ This document provides information on how to run the Laravel project, configure 
 
 1. Clone the project from the GitHub repository:
 ```bash
-git clone https://github.com/QixinWangCpsLab/BatchMeetingScheduler_ChengPikkei.git
+git clone https://github.com/beckycheng/BatchMeetingScheduler.git
 ```
 
 2. Install the project dependencies using Composer:
